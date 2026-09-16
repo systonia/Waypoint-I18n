@@ -1,0 +1,63 @@
+<?php
+
+namespace Waypoint\I18n\Tests;
+
+use PHPUnit\Framework\TestCase;
+use Waypoint\I18n\{I18nOptions, Translator};
+
+final class TranslatorTest extends TestCase
+{
+    private function translator(string $default = 'en', ?string $fallback = null): Translator
+    {
+        $options = new I18nOptions();
+        $options->directory = __DIR__ . '/catalogs';
+        $options->default = $default;
+        $options->fallback = $fallback;
+        return new Translator($options);
+    }
+
+    public function testTheSourceTextIsReturnedInTheDefaultLocale(): void
+    {
+        $this->assertSame('Hello Ada', $this->translator()->t('Hello {name}', ['name' => 'Ada']));
+    }
+
+    public function testTranslatesInTheCurrentLocaleWithPlaceholders(): void
+    {
+        $t = $this->translator();
+        $t->setLocale('de');
+        $this->assertSame('Hallo Ada', $t->t('Hello {name}', ['name' => 'Ada']));
+    }
+
+    public function testSelectsPluralByCount(): void
+    {
+        $t = $this->translator();
+        $this->assertSame('1 file', $t->t('{count} file|{count} files', ['count' => 1]));
+        $t->setLocale('de');
+        $this->assertSame('3 Dateien', $t->t('{count} file|{count} files', ['count' => 3]));
+    }
+
+    public function testAnUntranslatedOrUnknownTextFallsBackToTheFallbackLocaleThenTheSource(): void
+    {
+        $t = $this->translator('en', 'de');
+        $t->setLocale('fr');
+        $this->assertSame('Start', $t->t('Home'));            // fr has no entry, de has
+        $this->assertSame('Untranslated here', $t->t('Untranslated here')); // "" everywhere -> source
+        $this->assertSame('Never seen', $t->t('Never seen'));
+    }
+
+    public function testBundledValidationMessagesUnderlieTheAppCatalog(): void
+    {
+        $t = $this->translator();
+        $t->setLocale('de');
+        $this->assertSame('Dieser Wert ist zu kurz. Mindestlänge ist 8.', $t->translate('This value is too short. Minimum length is {min}.', ['min' => 8]));
+    }
+
+    public function testHasAndAvailable(): void
+    {
+        $t = $this->translator();
+        $this->assertTrue($t->has('en'));
+        $this->assertTrue($t->has('de'));
+        $this->assertFalse($t->has('xx'));
+        $this->assertSame(['en', 'de', 'fr'], $t->available());
+    }
+}
