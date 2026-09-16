@@ -1,6 +1,6 @@
 # waypoint-i18n
 
-Translations for [Waypoint](../Waypoint), gettext-style: the text in your code is the key.
+Translations for [Waypoint](https://github.com/Systonia/Waypoint), gettext-style: the text in your code is the key.
 
 ```php
 <h2><?= $this->t('Welcome to gdn.ani') ?></h2>
