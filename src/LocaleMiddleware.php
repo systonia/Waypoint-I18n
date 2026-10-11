@@ -43,7 +43,7 @@ final class LocaleMiddleware extends MiddlewareBase
             return $fromQuery;
         }
 
-        $fromCookie = $this->options->cookieName !== '' ? ($_COOKIE[$this->options->cookieName] ?? null) : null;
+        $fromCookie = $this->options->cookieName !== '' ? ($req->cookies[$this->options->cookieName] ?? null) : null;
         if (is_string($fromCookie) && $this->supports($fromCookie)) {
             return $fromCookie;
         }
