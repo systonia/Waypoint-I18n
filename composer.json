@@ -2,7 +2,7 @@
     "name": "systonia/waypoint-i18n",
     "description": "Translations and per-request locale for Waypoint: catalogs, {placeholder} and plural messages, $this->t() in views, translated validation errors.",
     "type": "library",
-    "license": "MIT",
+    "license": ["MIT", "Apache-2.0"],
     "require": {
         "php": ">=8.5",
         "systonia/waypoint": "^1.3"
