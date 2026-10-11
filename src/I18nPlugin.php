@@ -22,9 +22,9 @@ final class I18nPlugin extends PluginBase implements ViewHelper
         return 'i18n';
     }
 
-    public function boot(Container $container): void
+    public function boot(Container $container, I18nOptions $options): void
     {
-        $this->options = $container->get(I18nOptions::class);
+        $this->options = $options;
         $this->translator = new Translator($this->options);
         $container->set($this->translator);
         $container->bind(Messages::class, $this->translator);
