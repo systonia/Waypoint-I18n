@@ -6,9 +6,11 @@ use Closure;
 use Waypoint\Http\Request;
 
 /**
- * Configure via App::configure(function (I18nOptions $opts) { ... }).
- * Source texts in code are the keys; a catalog is {directory}/{locale}.json
- * mapping them to translations, kept up to date by the i18n:* CLI tasks.
+ * Settings of the i18n plugin: where the catalogs live, the source language and how a request picks its locale.
+ *
+ * Set them with `$app->configure(function (I18nOptions $opts) { ... })`. Source texts in code are the
+ * keys; a catalog is `{directory}/{locale}.json` mapping them to translations, kept up to date by the
+ * `i18n:*` CLI tasks.
  */
 class I18nOptions
 {
@@ -18,7 +20,7 @@ class I18nOptions
     /** The language the source texts are written in; needs no catalog. */
     public string $default = 'en';
 
-    /** Locale a missing translation is looked up in next; null = $default (i.e. the source text). */
+    /** Locale a missing translation is looked up in next; null looks in $default, which normally has no catalog, so the source text is shown. */
     public ?string $fallback = null;
 
     /** @var list<string> Locales a request may select; empty = every locale with a catalog file. */

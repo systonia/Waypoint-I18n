@@ -101,7 +101,10 @@ final class I18nTasks
         return "OK: every catalog is complete and consistent.\n";
     }
 
-    /** @param list<string> $argv */
+    /**
+     * Prints a table per locale: total entries, translated, empty, orphans and percent done.
+     * @param list<string> $argv
+     */
     #[Task('status')]
     public function status(array $argv, int $argc): string
     {

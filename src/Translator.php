@@ -5,11 +5,13 @@ namespace Waypoint\I18n;
 use Waypoint\Validation\Messages;
 
 /**
- * t('Source text', [...]) -> the current locale's translation, else the
- * fallback locale's, else the source text itself. {name} placeholders are
- * replaced from $params; "one|other" picks by $params['count']. Also the
- * container-bound Validation\Messages, so the Validator's English texts are
- * translated the same way.
+ * Translates source texts into the current locale, falling back to the fallback locale and then to the source text.
+ *
+ * `t('Source text', [...])` returns the current locale's translation, else the fallback locale's,
+ * else the source text itself. `{name}` placeholders are replaced from `$params`; `one|other` picks by
+ * `$params['count']`. The plugin registers one instance as a service (`#[Inject] Translator`) and binds
+ * it as `Validation\Messages`, so the Validator's English messages are translated the same way.
+ * Catalogs are read once per locale and kept for the life of the process.
  */
 final class Translator implements Messages
 {
@@ -23,17 +25,29 @@ final class Translator implements Messages
         $this->locale = $options->default;
     }
 
+    /** The locale of the current request; the default locale outside a request. */
     public function locale(): string
     {
         return $this->locale;
     }
 
+    /** Sets the locale t() uses; LocaleMiddleware calls it at the start of each request and resets it afterwards. */
     public function setLocale(string $locale): void
     {
         $this->locale = $locale;
     }
 
-    /** @param array<string, mixed> $params Scalars replace {placeholders}; 'count' selects the plural form. */
+    /**
+     * Translates a source text and fills in its placeholders. The text is returned unescaped.
+     *
+     * ```php
+     * $translator->t('{count} file|{count} files', ['count' => 3]);   // "3 files", or "3 Dateien" in de
+     * ```
+     *
+     * @param string $text The source text, which is also the catalog key.
+     * @param array<string, mixed> $params Scalars replace {placeholders}; 'count' selects the plural form.
+     * @param ?string $locale A locale for this call only, instead of the current one.
+     */
     public function t(string $text, array $params = [], ?string $locale = null): string
     {
         $locale ??= $this->locale;
@@ -43,6 +57,7 @@ final class Translator implements Messages
         return self::format($translated, $params);
     }
 
+    /** Validation\Messages: translates a Validator message in the current locale, the same as t(). */
     public function translate(string $text, array $params): string
     {
         return $this->t($text, $params);
@@ -64,6 +79,7 @@ final class Translator implements Messages
         return array_values(array_unique($locales));
     }
 
+    /** The path of a locale's catalog file, `{directory}/{locale}.json`, whether it exists or not. */
     public function catalogFile(string $locale): string
     {
         return rtrim($this->options->directory ?? '', '/') . "/$locale.json";

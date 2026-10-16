@@ -7,7 +7,9 @@ use Waypoint\Plugin\{PluginBase, ViewHelper};
 use Waypoint\Validation\Messages;
 
 /**
- * Register with `$app->plugin(new I18nPlugin())` and configure I18nOptions. Adds
+ * Translations for Waypoint: register with `$app->plugin(new I18nPlugin())` and configure I18nOptions.
+ *
+ * Adds
  * `$this->t('Source text', [...])` and `$this->locale()` to templates, resolves the
  * locale per request (LocaleMiddleware), translates the Validator's messages, and
  * provides the i18n:extract/check/status/add/lint CLI tasks.
@@ -22,6 +24,7 @@ final class I18nPlugin extends PluginBase implements ViewHelper
         return 'i18n';
     }
 
+    /** Creates the Translator, registers it as a service and binds it as the Validator's Messages. */
     public function boot(Container $container, I18nOptions $options): void
     {
         $this->options = $options;
@@ -45,6 +48,7 @@ final class I18nPlugin extends PluginBase implements ViewHelper
         return [$this];
     }
 
+    /** `$this->t(...)` and `$this->locale()` in templates. */
     public function helpers(): array
     {
         return [

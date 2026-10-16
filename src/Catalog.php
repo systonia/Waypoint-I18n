@@ -5,23 +5,31 @@ namespace Waypoint\I18n;
 use RuntimeException;
 
 /**
- * One locale's catalog file: a flat JSON object {source text: translation},
- * "" meaning "not translated yet", plus an optional "__orphans" object for
- * entries whose source text no longer occurs in the code (kept, not lost).
+ * One locale's catalog file, read and written by the CLI tasks.
+ *
+ * The file is a flat JSON object `{source text: translation}`, `""` meaning "not translated yet",
+ * plus an optional `"__orphans"` object for entries whose source text no longer occurs in the code
+ * (kept, not lost).
  */
 final class Catalog
 {
+    /** The key of the object holding orphaned entries. */
     public const ORPHANS = '__orphans';
 
     /**
-     * @param array<string, string> $entries
-     * @param array<string, string> $orphans
+     * @param string $file Path of the JSON file.
+     * @param array<string, string> $entries Source text => translation ("" = untranslated).
+     * @param array<string, string> $orphans Entries whose source text is no longer in the code.
      */
     public function __construct(public readonly string $file, public array $entries = [], public array $orphans = [])
     {
     }
 
-    /** An empty catalog for a file that doesn't exist yet; invalid JSON is an error, never silently empty. */
+    /**
+     * Reads a catalog file; a file that doesn't exist yet gives an empty catalog.
+     *
+     * @throws RuntimeException when the file is not a JSON object; invalid JSON is never silently empty.
+     */
     public static function load(string $file): self
     {
         if (!is_file($file)) {
@@ -42,6 +50,7 @@ final class Catalog
         return $catalog;
     }
 
+    /** True when the file exists on disk. */
     public function exists(): bool
     {
         return is_file($this->file);

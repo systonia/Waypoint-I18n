@@ -11,6 +11,9 @@ The source language needs no catalog. Every other language is one flat JSON file
 tasks keep in sync with the code, so nothing is maintained by hand and a missing translation shows
 the source text, never a raw key.
 
+Documentation: [guides and reference](docs/index.md) — [writing text](docs/guides/translating-text.md),
+[catalogs and tasks](docs/guides/catalogs.md), [locale per request](docs/guides/locale.md), [API reference](docs/reference/index.md).
+
 ## Installation
 
 ```bash

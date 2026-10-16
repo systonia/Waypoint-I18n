@@ -5,9 +5,11 @@ namespace Waypoint\I18n;
 use Waypoint\Http\{MiddlewareBase, Request, Response};
 
 /**
- * Picks the request's locale (resolver, ?lang=, cookie, Accept-Language, default),
- * sets it on the Translator, remembers an explicit choice in the cookie, and sends
- * Content-Language. Resets the Translator afterwards so nothing leaks between requests.
+ * Picks the locale of each request and sets it on the Translator; the plugin adds it app-wide.
+ *
+ * The order is: resolver, `?lang=`, cookie, Accept-Language, default. An explicit choice by query
+ * parameter is remembered in the cookie, and the response carries Content-Language. The Translator
+ * is reset to the default afterwards.
  */
 final class LocaleMiddleware extends MiddlewareBase
 {
