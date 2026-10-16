@@ -50,7 +50,7 @@ The locale of the current request; the default locale outside a request.
 public function setLocale(string $locale): void
 ```
 
-Sets the locale t() uses for the current request; LocaleMiddleware calls it at the start of each request and resets it afterwards.
+Sets the locale t() uses for the current request; LocaleMiddleware calls it at the start of each request.
 
 **Parameters**
 

@@ -16,8 +16,8 @@ Extends `Waypoint\Http\MiddlewareBase`
 Picks the locale of each request and sets it on the Translator; the plugin adds it app-wide.
 
 The order is: resolver, `?lang=`, cookie, Accept-Language, default. An explicit choice by query
-parameter is remembered in the cookie, and the response carries Content-Language. The Translator
-is reset to the default afterwards.
+parameter is remembered in the cookie, and the response carries Content-Language. The locale
+stays with the request, also for a WebSocket its response hands over to (Live components).
 
 ## Methods
 

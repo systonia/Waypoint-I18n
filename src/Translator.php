@@ -34,7 +34,7 @@ final class Translator implements Messages
         return $this->locale->get() ?? $this->options->default;
     }
 
-    /** Sets the locale t() uses for the current request; LocaleMiddleware calls it at the start of each request and resets it afterwards. */
+    /** Sets the locale t() uses for the current request; LocaleMiddleware calls it at the start of each request. */
     public function setLocale(string $locale): void
     {
         $this->locale->set($locale);

@@ -72,7 +72,6 @@ final class TranslatorTest extends TestCase
                 $t->setLocale($locale);
                 Fiber::suspend();
                 $seen[$locale] = $t->t('Hello {name}', ['name' => 'Ada']);
-                $t->setLocale('en');   // LocaleMiddleware::after()
             });
         };
 

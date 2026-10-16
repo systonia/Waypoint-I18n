@@ -2,7 +2,8 @@
 
 namespace Waypoint\I18n\Tests;
 
-use Waypoint\I18n\{I18nOptions, I18nPlugin};
+use Waypoint\Http\Request;
+use Waypoint\I18n\{I18nOptions, I18nPlugin, Translator};
 use Waypoint\Options\RendererOptions;
 use Waypoint\Testing\TestCase;
 
@@ -45,6 +46,21 @@ final class PluginTest extends TestCase
     public function testUnknownLocaleFallsBackToDefault(): void
     {
         $this->get('/hello?lang=xx')->assertBody("<p>Hello Ada (en)</p>\n");
+    }
+
+    public function testAnUpgradedRequestKeepsItsLocaleForTheRuntime(): void
+    {
+        $app = $this->app();
+        $res = $app->handle(Request::fromParts('GET', '/socket?lang=de'));
+        $translator = $app->get(Translator::class);
+        $this->assertNotNull($translator);
+        $context = $res->getContext();
+        $this->assertNotNull($context);
+
+        // The WebSocket handler runs later, in a task that starts without the request's values
+        $translator->setLocale('en');
+        $context();
+        $this->assertSame('de', $translator->locale());
     }
 
     public function testValidationMessagesAreTranslated(): void

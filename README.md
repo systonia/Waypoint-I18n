@@ -92,7 +92,7 @@ scripts in your app (`"i18n:check": "php index.php i18n:check"` etc.); arguments
 
 Only locales in `$supported` are accepted; with `$supported` empty, any locale that has a catalog
 file. The response carries `Content-Language`. The locale belongs to its request, also when Tenma runs
-several requests of one worker at once, and is reset afterwards.
+several requests of one worker at once, and for a WebSocket the response hands over to (Live components).
 
 ## Validation messages
 
