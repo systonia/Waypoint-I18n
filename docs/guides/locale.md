@@ -90,12 +90,6 @@ CLI tasks, timers and code at startup run outside the middleware, so `locale()` 
 $body = $translator->t('Your export is ready.', [], $user->locale);
 ```
 
-The current locale is a property of the one `Translator` service. Under Tenma, requests of one worker run concurrently in fibers; when a request waits (a database query, `Tenma::sleep()`, an outgoing HTTP call), another request can set or reset that property before the first one continues, and the rest of the first request, its view included, then translates in that other locale. In handlers that wait before they translate, read the locale before the wait and pass it to `t()` explicitly:
-
-```php
-$locale = $this->translator->locale();
-$rows = $db->query('SELECT ...');                  // other requests run meanwhile
-return ['title' => $this->translator->t('Report', [], $locale)];
-```
+The current locale belongs to the request. The `Translator` is one shared service, but it keeps the locale in a `Waypoint\Support\FiberLocal`, so under Tenma, where one worker runs requests concurrently, a request that waits (a database query, `Tenma::sleep()`, an outgoing HTTP call) still translates in its own locale when it continues, whatever other requests chose in the meantime.
 
 See also: [`LocaleMiddleware`](../reference/Waypoint/I18n/LocaleMiddleware.md), [Configuration](configuration.md).

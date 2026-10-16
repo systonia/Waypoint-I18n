@@ -19,7 +19,8 @@ Translates source texts into the current locale, falling back to the fallback lo
 else the source text itself. `{name}` placeholders are replaced from `$params`; `one|other` picks by
 `$params['count']`. The plugin registers one instance as a service (`#[Inject] Translator`) and binds
 it as `Validation\Messages`, so the Validator's English messages are translated the same way.
-Catalogs are read once per locale and kept for the life of the process.
+Catalogs are read once per locale and kept for the life of the process. The current locale is kept per
+request (a FiberLocal), so requests a worker runs interleaved each translate in their own locale.
 
 ## Methods
 
@@ -49,7 +50,7 @@ The locale of the current request; the default locale outside a request.
 public function setLocale(string $locale): void
 ```
 
-Sets the locale t() uses; LocaleMiddleware calls it at the start of each request and resets it afterwards.
+Sets the locale t() uses for the current request; LocaleMiddleware calls it at the start of each request and resets it afterwards.
 
 **Parameters**
 

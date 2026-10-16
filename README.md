@@ -91,7 +91,8 @@ scripts in your app (`"i18n:check": "php index.php i18n:check"` etc.); arguments
 5. `$default`
 
 Only locales in `$supported` are accepted; with `$supported` empty, any locale that has a catalog
-file. The response carries `Content-Language`. The locale is reset after every request.
+file. The response carries `Content-Language`. The locale belongs to its request, also when Tenma runs
+several requests of one worker at once, and is reset afterwards.
 
 ## Validation messages
 

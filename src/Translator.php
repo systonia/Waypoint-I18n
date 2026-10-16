@@ -2,6 +2,7 @@
 
 namespace Waypoint\I18n;
 
+use Waypoint\Support\FiberLocal;
 use Waypoint\Validation\Messages;
 
 /**
@@ -11,30 +12,32 @@ use Waypoint\Validation\Messages;
  * else the source text itself. `{name}` placeholders are replaced from `$params`; `one|other` picks by
  * `$params['count']`. The plugin registers one instance as a service (`#[Inject] Translator`) and binds
  * it as `Validation\Messages`, so the Validator's English messages are translated the same way.
- * Catalogs are read once per locale and kept for the life of the process.
+ * Catalogs are read once per locale and kept for the life of the process. The current locale is kept per
+ * request (a FiberLocal), so requests a worker runs interleaved each translate in their own locale.
  */
 final class Translator implements Messages
 {
     /** @var array<string, array<string, string>> locale => source => translation (bundled defaults underneath the app's catalog) */
     private array $catalogs = [];
 
-    private string $locale;
+    /** @var FiberLocal<string> */
+    private FiberLocal $locale;
 
     public function __construct(private I18nOptions $options)
     {
-        $this->locale = $options->default;
+        $this->locale = new FiberLocal();
     }
 
     /** The locale of the current request; the default locale outside a request. */
     public function locale(): string
     {
-        return $this->locale;
+        return $this->locale->get() ?? $this->options->default;
     }
 
-    /** Sets the locale t() uses; LocaleMiddleware calls it at the start of each request and resets it afterwards. */
+    /** Sets the locale t() uses for the current request; LocaleMiddleware calls it at the start of each request and resets it afterwards. */
     public function setLocale(string $locale): void
     {
-        $this->locale = $locale;
+        $this->locale->set($locale);
     }
 
     /**
@@ -50,7 +53,7 @@ final class Translator implements Messages
      */
     public function t(string $text, array $params = [], ?string $locale = null): string
     {
-        $locale ??= $this->locale;
+        $locale ??= $this->locale();
         $translated = $this->lookup($text, $locale)
             ?? $this->lookup($text, $this->options->fallback ?? $this->options->default)
             ?? $text;

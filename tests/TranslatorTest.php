@@ -2,6 +2,7 @@
 
 namespace Waypoint\I18n\Tests;
 
+use Fiber;
 use PHPUnit\Framework\TestCase;
 use Waypoint\I18n\{I18nOptions, Translator};
 
@@ -59,5 +60,30 @@ final class TranslatorTest extends TestCase
         $this->assertTrue($t->has('de'));
         $this->assertFalse($t->has('xx'));
         $this->assertSame(['en', 'de', 'fr'], $t->available());
+    }
+
+    public function testTheLocaleIsKeptPerRequestWhenRequestsInterleave(): void
+    {
+        $t = $this->translator();
+        $seen = [];
+        // Two requests in Fibers of one worker, as under Tenma: each sets its locale, waits, then translates
+        $request = function (string $locale) use ($t, &$seen): Fiber {
+            return new Fiber(function () use ($t, $locale, &$seen): void {
+                $t->setLocale($locale);
+                Fiber::suspend();
+                $seen[$locale] = $t->t('Hello {name}', ['name' => 'Ada']);
+                $t->setLocale('en');   // LocaleMiddleware::after()
+            });
+        };
+
+        $de = $request('de');
+        $en = $request('en');
+        $de->start();
+        $en->start();
+        $en->resume();
+        $de->resume();
+
+        $this->assertSame(['en' => 'Hello Ada', 'de' => 'Hallo Ada'], $seen);
+        $this->assertSame('en', $t->locale());
     }
 }
