@@ -23,6 +23,6 @@ public static function scan(array $paths): array
 
 **Parameters**
 
-- `$paths` `list<string>` — Files or directories.
+- `$paths` `list<string>`: Files or directories.
 
 **Returns** `list<array{file: string, line: int, text: ?string, raw: string, quote: ?string}>`

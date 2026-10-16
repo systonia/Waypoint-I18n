@@ -133,8 +133,8 @@ Only reports; it never fails.
 
 ```bash
 $ php index.php i18n:lint
-/app/src/Bad.php:1: t() with a non-literal argument ($label) -- extract cannot see it
-/app/src/Bad.php:1: double-quoted text contains $ -- PHP interpolates it before t() sees it
+/app/src/Bad.php:1: t() with a non-literal argument ($label): extract cannot see it
+/app/src/Bad.php:1: double-quoted text contains $, and PHP interpolates it before t() sees it
 /app/src/Bad.php:1: text has leading or trailing whitespace: " Save "
 near-duplicate texts: " Save " (/app/src/Bad.php:1), "save." (/app/src/Bad.php:1)
 4 finding(s).

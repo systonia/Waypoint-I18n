@@ -73,9 +73,9 @@ public function __construct(
 
 **Parameters**
 
-- `$file` `string` — Path of the JSON file.
-- `$entries` `array<string, string>` — Source text => translation ("" = untranslated).
-- `$orphans` `array<string, string>` — Entries whose source text is no longer in the code.
+- `$file` `string`: Path of the JSON file.
+- `$entries` `array<string, string>`: Source text => translation ("" = untranslated).
+- `$orphans` `array<string, string>`: Entries whose source text is no longer in the code.
 
 ### load()
 
@@ -93,7 +93,7 @@ Reads a catalog file; a file that doesn't exist yet gives an empty catalog.
 
 **Throws**
 
-- [`RuntimeException`](https://www.php.net/manual/en/class.runtimeexception.php) — when the file is not a JSON object; invalid JSON is never silently empty.
+- [`RuntimeException`](https://www.php.net/manual/en/class.runtimeexception.php): when the file is not a JSON object; invalid JSON is never silently empty.
 
 ### exists()
 
@@ -119,4 +119,4 @@ Writes the file, entries sorted naturally and case-insensitively, orphans last.
 public function untranslated(): array
 ```
 
-**Returns** `list<string>` — Source texts without a translation.
+**Returns** `list<string>`: Source texts without a translation.

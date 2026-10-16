@@ -69,9 +69,9 @@ $translator->t('{count} file|{count} files', ['count' => 3]);   // "3 files", or
 
 **Parameters**
 
-- `$text` `string` — The source text, which is also the catalog key.
-- `$params` `array<string, mixed>` — Scalars replace {placeholders}; 'count' selects the plural form.
-- `$locale` `?string` — A locale for this call only, instead of the current one.
+- `$text` `string`: The source text, which is also the catalog key.
+- `$params` `array<string, mixed>`: Scalars replace {placeholders}; 'count' selects the plural form.
+- `$locale` `?string`: A locale for this call only, instead of the current one.
 
 **Returns** `string`
 
@@ -110,7 +110,7 @@ True for the default locale or any locale with a catalog file.
 public function available(): array
 ```
 
-**Returns** `list<string>` — The default locale plus every locale with a catalog file.
+**Returns** `list<string>`: The default locale plus every locale with a catalog file.
 
 ### catalogFile()
 

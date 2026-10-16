@@ -52,7 +52,7 @@ Creates the Translator, registers it as a service and binds it as the Validator'
 public function classes(): array
 ```
 
-**Returns** `list<class-string>` — Controllers and #[Manager] classes attach() adds.
+**Returns** `list<class-string>`: Controllers and #[Manager] classes attach() adds.
 
 ### middlewares()
 
@@ -60,7 +60,7 @@ public function classes(): array
 public function middlewares(): array
 ```
 
-**Returns** `list<callable>` — App-level middlewares, added at attach() in registration order.
+**Returns** `list<callable>`: App-level middlewares, added at attach() in registration order.
 
 ### hooks()
 
@@ -68,7 +68,7 @@ public function middlewares(): array
 public function hooks(): array
 ```
 
-**Returns** `list<object>` — Instances of Endpoint, Fallback, RouteAttributeCompiler, Guard, ResponseHook, ArgumentBinder, Renderer, OpenApiExtension, ViewHelper, ClientAsset.
+**Returns** `list<object>`: Instances of Endpoint, Fallback, RouteAttributeCompiler, Guard, ResponseHook, ArgumentBinder, Renderer, OpenApiExtension, ViewHelper, ClientAsset.
 
 ### helpers()
 

@@ -156,14 +156,14 @@ final class I18nTasks
         foreach (SourceScanner::scan($this->scanPaths()) as $call) {
             $where = "{$call['file']}:{$call['line']}";
             if ($call['text'] === null) {
-                $findings[] = "$where: t() with a non-literal argument ({$call['raw']}) -- extract cannot see it";
+                $findings[] = "$where: t() with a non-literal argument ({$call['raw']}): extract cannot see it";
                 continue;
             }
             if ($call['text'] !== trim($call['text'])) {
                 $findings[] = "$where: text has leading or trailing whitespace: \"{$call['text']}\"";
             }
             if ($call['quote'] === '"' && str_contains($call['text'], '$')) {
-                $findings[] = "$where: double-quoted text contains \$ -- PHP interpolates it before t() sees it";
+                $findings[] = "$where: double-quoted text contains \$, and PHP interpolates it before t() sees it";
             }
             $byNormalized[strtolower(rtrim(trim($call['text']), '.:!?'))][$call['text']] = $where;
         }
