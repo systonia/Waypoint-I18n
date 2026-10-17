@@ -4,7 +4,7 @@ description: One topic per page, with examples taken from a running app.
 order: 10
 ---
 
-Each guide covers one part of the plugin. The [reference](../reference/index.md) lists every class and method.
+Each guide covers one part of the plugin, with examples from [Sonnenkorn](https://github.com/systonia/Waypoint-Bakery), the example bakery app, which runs in English and German. The [reference](../reference/index.md) lists every class and method.
 
 - [Writing translatable text](translating-text.md): `t()` in templates and services, placeholders, plural forms, escaping
 - [Catalogs and the CLI tasks](catalogs.md): the JSON format, fallback, orphans, `i18n:extract`, `check`, `status`, `add`, `lint`

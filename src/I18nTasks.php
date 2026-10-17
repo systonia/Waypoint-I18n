@@ -7,7 +7,7 @@ use Waypoint\Attributes\{Inject, Manager, Task};
 use Waypoint\Options\RendererOptions;
 
 /**
- * The catalog workflow as CLI tasks (`php index.php i18n:extract` etc.). A task
+ * The catalog workflow as CLI tasks (`tenma index.php i18n:extract` etc.). A task
  * that finds problems throws, so the process exits with 1 for CI.
  */
 #[Manager('i18n')]

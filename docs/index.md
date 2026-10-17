@@ -4,7 +4,7 @@ description: Translations for Waypoint apps, with the text in the code as the ke
 order: 1
 ---
 
-Waypoint I18n translates the texts of a [Waypoint](https://github.com/systonia/Waypoint) app. The text you write in the code is the key: `$this->t('Save')` in a template shows "Save" in the source language and "Speichern" once the German catalog has that entry. The source language needs no catalog. Every other language is one flat JSON file that CLI tasks keep in sync with the code, and a text without a translation shows the source text, never a raw key.
+Waypoint I18n translates the texts of a [Waypoint](https://github.com/systonia/Waypoint) app. The text you write in the code is the key: `$this->t('Shop')` in a template shows "Shop" in the source language and "Laden" once the German catalog has that entry. The source language needs no catalog. Every other language is one flat JSON file that CLI tasks keep in sync with the code, and a text without a translation shows the source text, never a raw key.
 
 The plugin also picks a locale for every request (query parameter, cookie, `Accept-Language`), sends `Content-Language`, and translates the Validator's error messages, with German ones included.
 
@@ -21,76 +21,59 @@ use Waypoint\I18n\{I18nOptions, I18nPlugin};
 
 $app->plugin(new I18nPlugin());
 
-$app->configure(function (I18nOptions $opts) {
-    $opts->directory = __DIR__ . '/lang';                       // lang/de.json, lang/fr.json
-    $opts->default = 'en';                                      // the language the code is written in
-    $opts->supported = ['en', 'de'];
-    $opts->scanPaths = [__DIR__ . '/views', __DIR__ . '/src'];  // where the tasks look for t() calls
+$app->configure(function (I18nOptions $i18n) {
+    $i18n->directory = __DIR__ . '/lang';                       // lang/de.json
+    $i18n->default = 'en';                                      // the language the code is written in
+    $i18n->supported = ['en', 'de'];
+    $i18n->scanPaths = [__DIR__ . '/views', __DIR__ . '/src'];  // where the tasks look for t() calls
 });
 ```
 
 ## A first translated page
 
-`index.php`:
-
-```php
-<?php
-
-require __DIR__ . '/vendor/autoload.php';
-
-use Waypoint\Attributes\{Controller, Get};
-use Waypoint\Http\View;
-use Waypoint\I18n\{I18nOptions, I18nPlugin};
-use Waypoint\Options\RendererOptions;
-use Waypoint\Waypoint;
-
-#[Controller]
-final class HomeController
-{
-    #[Get('/')]
-    public function home(): View
-    {
-        return new View('Home', ['name' => 'Ada', 'files' => 3], partial: true);
-    }
-}
-
-$app = Waypoint::create();
-$app->plugin(new I18nPlugin());
-$app->configure(function (I18nOptions $opts) {
-    $opts->directory = __DIR__ . '/lang';
-    $opts->supported = ['en', 'de'];
-    $opts->scanPaths = [__DIR__ . '/views'];
-});
-$app->configure(function (RendererOptions $opts) {
-    $opts->directory = __DIR__ . '/views';
-});
-$app->attach([HomeController::class]);
-$app->serve();
-```
-
-`views/Home.php`:
+The examples in these docs come from [Sonnenkorn](https://github.com/systonia/Waypoint-Bakery), a made-up bakery with an online shop and a back office, in English and German. The setup above is its `app.php`. The shop's layout, `views/_Layout.php`, shortened:
 
 ```html
-<h1>{{ $this->t('Hello {name}', ['name' => $model['name']]) }}</h1>
-<p>{{ $this->t('{count} file|{count} files', ['count' => $model['files']]) }}</p>
-<p>{{ $this->t('Current language: {locale}', ['locale' => $this->locale()]) }}</p>
+<!doctype html>
+<html lang="{{ $this->locale() }}">
+<head>
+    <title>@yield('title') · Sonnenkorn</title>
+</head>
+<body>
+<header>
+    <span>{{ $this->t('Bakery in Freiburg, order today, pick up fresh') }}</span>
+    <nav>
+        <a href="?lang=en" class="{{ $this->locale() === 'en' ? 'font-semibold' : 'text-stone-500' }}">EN</a>
+        <a href="?lang=de" class="{{ $this->locale() === 'de' ? 'font-semibold' : 'text-stone-500' }}">DE</a>
+    </nav>
+</header>
+<main>{{ $content }}</main>
+</body>
+</html>
 ```
 
-Create the German catalog from the code, then fill in the empty strings:
+And the catalog page that fills it, `views/Shop/Catalog.php`:
+
+```html
+@section('title')
+    {{ $this->t('Shop') }}
+@endsection
+```
+
+Create the German catalog from the code, then fill in the empty strings. The Bakery's `lang/de.json` has 81 texts; these two belong to this page:
 
 ```bash
-php index.php i18n:add de
+tenma index.php i18n:add de
 ```
 
 ```json
 {
-    "Current language: {locale}": "Aktuelle Sprache: {locale}",
-    "Hello {name}": "Hallo {name}",
-    "{count} file|{count} files": "{count} Datei|{count} Dateien"
+    "Bakery in Freiburg, order today, pick up fresh": "Bäckerei in Freiburg, heute bestellen, frisch abholen",
+    "Shop": "Laden"
 }
 ```
 
-Run it with `tenma index.php` (or `php -S localhost:8080 index.php`). `/` answers in English with `Content-Language: en`; `/?lang=de` answers "Hallo Ada", "3 Dateien", "Aktuelle Sprache: de" and sets the `lang` cookie, so the following requests stay German. A browser sending `Accept-Language: de-AT` gets German without asking.
+Run it with `tenma index.php`. `/` answers in English with `Content-Language: en`; `/?lang=de` answers with the title "Laden · Sonnenkorn" and "Bäckerei in Freiburg, heute bestellen, frisch abholen", and sets the `lang` cookie, so the following pages stay German. A browser sending `Accept-Language: de-AT` gets German without asking.
 
 ## How these docs are organised
 

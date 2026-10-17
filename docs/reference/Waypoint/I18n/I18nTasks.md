@@ -1,6 +1,6 @@
 ---
 title: "I18nTasks"
-description: "The catalog workflow as CLI tasks (`php index.php i18n:extract` etc.)."
+description: "The catalog workflow as CLI tasks (`tenma index.php i18n:extract` etc.)."
 order: 100
 generated: true
 ---
@@ -11,7 +11,7 @@ generated: true
 final class I18nTasks
 ```
 
-The catalog workflow as CLI tasks (`php index.php i18n:extract` etc.). A task
+The catalog workflow as CLI tasks (`tenma index.php i18n:extract` etc.). A task
 that finds problems throws, so the process exits with 1 for CI.
 
 ## Methods

@@ -6,36 +6,41 @@ order: 40
 
 Waypoint's Validator writes its messages in English (`This value should not be blank.`) and asks the container for a `Waypoint\Validation\Messages` service to translate them. The plugin binds its [`Translator`](../reference/Waypoint/I18n/Translator.md) as that service, so validation errors come out in the locale of the request, like every other text.
 
+The Bakery's JSON API hands out bearer tokens for email and password. From `src/Requests/Credentials.php` and `src/Controllers/ApiController.php`, shortened:
+
 ```php
-use Waypoint\Attributes\{Body, Controller, Email, NotBlank, Post};
+use Waypoint\Attributes\{Email, NotBlank};
 use Waypoint\FromArray;
 
-final class SignupForm
+final class Credentials
 {
     use FromArray;
 
     #[NotBlank]
     #[Email]
-    public ?string $email = null;
-}
+    public string $email = '';
 
-#[Controller]
-final class SignupController
+    #[NotBlank]
+    public string $password = '';
+}
+```
+
+```php
+#[Post('/tokens')]
+public function token(#[Body] Credentials $credentials): BearerToken
 {
-    #[Post('/signup')]
-    public function signup(#[Body] SignupForm $form): array
-    {
-        return ['ok' => true];
-    }
+    $user = $this->users->verify($credentials->email, $credentials->password)
+        ?? throw new UnauthorizedException('Wrong email or password.');
+    return new BearerToken(JWT::encode($user));
 }
 ```
 
 ```bash
-$ curl -X POST 'localhost:8080/signup?lang=de' -H 'Content-Type: application/json' -d '{"email":"nope"}'
-{"type":"about:blank","title":"Validation failed","status":422,"detail":"Validation failed","errors":{"email":"Dieser Wert ist keine gültige E-Mail-Adresse."}}
+$ curl -X POST 'localhost:8080/v1/tokens?lang=de' -H 'Content-Type: application/json' -d '{"email":"ben","password":""}'
+{"type":"about:blank","title":"Validation failed","status":422,"detail":"Validation failed","errors":{"email":"Dieser Wert ist keine g\u00fcltige E-Mail-Adresse.","password":"Dieser Wert darf nicht leer sein."}}
 ```
 
-Without `?lang=de` (and no cookie or German browser) the same request answers `This value is not a valid email address.`
+Without `?lang=de` (and no cookie or German browser) the same request answers `This value is not a valid email address.` The messages a live component gets from a DTO come out the same way: the checkout's `CheckoutForm` (`#[NotBlank]`, `#[Email]`, `#[Length]`, `#[Regex]`) shows "Dieser Wert darf nicht leer sein." under an empty name field for a German customer.
 
 ## The bundled German
 

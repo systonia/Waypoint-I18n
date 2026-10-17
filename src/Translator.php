@@ -44,7 +44,7 @@ final class Translator implements Messages
      * Translates a source text and fills in its placeholders. The text is returned unescaped.
      *
      * ```php
-     * $translator->t('{count} file|{count} files', ['count' => 3]);   // "3 files", or "3 Dateien" in de
+     * $translator->t('{count} pretzel|{count} pretzels', ['count' => 3]);   // "3 pretzels", or "3 Brezeln" in de
      * ```
      *
      * @param string $text The source text, which is also the catalog key.

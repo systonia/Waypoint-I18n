@@ -3,9 +3,14 @@
 Translations for [Waypoint](https://github.com/Systonia/Waypoint): the text in your code is the key.
 
 ```html
-<h2>{{ $this->t('Welcome to gdn.ani') }}</h2>
-<p>{{ $this->t('{count} file|{count} files', ['count' => $n]) }}</p>
+<html lang="{{ $this->locale() }}">
+...
+<span>{{ $this->t('Bakery in Freiburg, order today, pick up fresh') }}</span>
+<a href="?lang=de">DE</a>
 ```
+
+The examples come from [Sonnenkorn](https://github.com/systonia/Waypoint-Bakery), the example bakery app,
+which runs in English and German.
 
 The source language needs no catalog. Every other language is one flat JSON file that the CLI
 tasks keep in sync with the code, so nothing is maintained by hand and a missing translation shows
@@ -29,21 +34,21 @@ use Waypoint\I18n\{I18nOptions, I18nPlugin};
 
 $app->plugin(new I18nPlugin());               // before attach()
 
-$app->configure(function (I18nOptions $opts) {
-    $opts->directory = __DIR__ . '/lang';      // lang/de.json, lang/fr.json
-    $opts->default = 'en';                     // the language the code is written in
-    $opts->supported = ['en', 'de', 'fr'];
-    $opts->scanPaths = [__DIR__ . '/views', __DIR__ . '/src'];
+$app->configure(function (I18nOptions $i18n) {
+    $i18n->directory = __DIR__ . '/lang';      // lang/de.json
+    $i18n->default = 'en';                     // the language the code is written in
+    $i18n->supported = ['en', 'de'];
+    $i18n->scanPaths = [__DIR__ . '/views', __DIR__ . '/src'];
 });
 ```
 
 ## Writing text
 
-- Templates: `$this->t('Save')`, `$this->t('Hello {name}', ['name' => $user->name])`, `$this->locale()`.
+- Templates: `$this->t('Sales')`, `$this->t('Sign out {name}', ['name' => $user['name']])`, `$this->locale()`.
 - Services and controllers: `#[Inject] Waypoint\I18n\Translator $translator` and `$translator->t(...)`.
 - `{name}` is replaced from the parameters; `one|other` picks the first form when `count` is 1.
 - `t()` never escapes, so it also works for `<title>`, attributes or mail text; in a view `{{ }}`
-  escapes the result: `{{ $this->t('Welcome back, {name}.', ['name' => $name]) }}`.
+  escapes the result: `{{ $this->t('Thank you, {name}!', ['name' => $order->customerName]) }}`.
 - Use string literals: `t($variable)` works at runtime but the tasks cannot see it (`i18n:lint` reports it).
 
 ## Catalogs
@@ -52,12 +57,12 @@ $app->configure(function (I18nOptions $opts) {
 
 ```json
 {
-    "Hello {name}": "Hallo {name}",
-    "Save": "Speichern",
-    "{count} file|{count} files": "{count} Datei|{count} Dateien",
-    "Create an account": "",
+    "Sales": "Verkäufe",
+    "Thank you, {name}! Your order is reserved.": "Danke, {name}! Deine Bestellung ist reserviert.",
+    "{count} pretzel|{count} pretzels": "{count} Brezel|{count} Brezeln",
+    "Your cart is empty.": "",
     "__orphans": {
-        "Old wording": "Alte Formulierung"
+        "Thanks, {name}!": "Danke, {name}!"
     }
 }
 ```
@@ -69,15 +74,15 @@ A missing entry is looked up in `$fallback` before falling back to the source te
 ## Tasks
 
 ```bash
-php index.php i18n:extract     # scan the code, add new texts to every catalog, move gone ones to __orphans
-php index.php i18n:check       # exit 1 on untranslated entries, orphans, placeholder/plural mismatches, missing catalogs
-php index.php i18n:status      # per-locale table: total, translated, empty, orphans, percent done
-php index.php i18n:add fr      # create lang/fr.json with every source text untranslated
-php index.php i18n:lint        # exit 1 on t($var), padded texts, "$interpolation", near-duplicate texts
+tenma index.php i18n:extract     # scan the code, add new texts to every catalog, move gone ones to __orphans
+tenma index.php i18n:check       # exit 1 on untranslated entries, orphans, placeholder/plural mismatches, missing catalogs
+tenma index.php i18n:status      # per-locale table: total, translated, empty, orphans, percent done
+tenma index.php i18n:add fr      # create lang/fr.json with every source text untranslated
+tenma index.php i18n:lint        # exit 1 on t($var), padded texts, "$interpolation", near-duplicate texts
 ```
 
 Typical loop: write code, `extract`, translate the empty strings, `check` in CI. Handy as Composer
-scripts in your app (`"i18n:check": "php index.php i18n:check"` etc.); arguments pass through
+scripts in your app (`"i18n:check": "tenma index.php i18n:check"` etc.); arguments pass through
 (`composer i18n:add fr`).
 
 ## Locale per request

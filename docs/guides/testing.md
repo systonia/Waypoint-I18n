@@ -8,62 +8,52 @@ Tests use Waypoint's testing kit, `Waypoint\Testing\TestCase`. Requests go throu
 
 ## Translated pages and responses
 
-Point `directory` at small fixture catalogs next to the tests, and choose the language per request with the query parameter, a cookie or `Accept-Language`:
+The Bakery's tests extend `Bakery\Tests\Support\AppTestCase`, a `TestCase` that loads the real `app.php`, so they run with the real `lang/de.json`. Choose the language per request with the query parameter, a cookie or `Accept-Language`. From `tests/Controllers/ShopControllerTest.php`, with three more cases in the same style:
 
 ```php
-<?php
+use Bakery\Tests\Support\AppTestCase;
 
-use Waypoint\I18n\{I18nOptions, I18nPlugin};
-use Waypoint\Options\RendererOptions;
-use Waypoint\Testing\TestCase;
-
-final class GreetingTest extends TestCase
+final class ShopControllerTest extends AppTestCase
 {
-    protected function setUp(): void
+    public function testTheCatalogShowsTheRangeInEnglishAndGerman(): void
     {
-        parent::setUp();
-        $app = $this->app();
-        $app->plugin(new I18nPlugin());
-        $app->configure(function (I18nOptions $opts) {
-            $opts->directory = __DIR__ . '/lang';            // tests/lang/de.json: {"Hello {name}": "Hallo {name}"}
-            $opts->supported = ['en', 'de'];
-        });
-        $app->configure(function (RendererOptions $opts) {
-            $opts->directory = __DIR__ . '/views';
-        });
-        $app->attach([HomeController::class]);
-    }
-
-    public function testEnglishByDefault(): void
-    {
-        $this->get('/api/greeting')
-            ->assertJsonPath('message', 'Hello Ada')
-            ->assertHeader('Content-Language', 'en');
-    }
-
-    public function testTheQueryParameterSelectsAndRemembersGerman(): void
-    {
-        $this->get('/api/greeting?lang=de')
-            ->assertJsonPath('message', 'Hallo Ada')
+        $this->get('/')->assertOk()->assertSee('Lye pretzel')->assertHeader('Content-Language', 'en');
+        $this->get('/?lang=de')->assertOk()->assertSee('Laugenbrezel')->assertSee('In den Warenkorb')
             ->assertCookie('lang', 'de');
     }
 
     public function testTheBrowserLanguage(): void
     {
-        $this->get('/api/greeting', ['Accept-Language' => 'de-AT,de;q=0.9'])->assertJsonPath('message', 'Hallo Ada');
+        $this->get('/', ['Accept-Language' => 'de-AT,de;q=0.9'])->assertSee('In den Warenkorb');
     }
 
     public function testTheCookie(): void
     {
-        $this->request('GET', '/api/greeting')->withCookie('lang', 'de')->send()->assertJsonPath('message', 'Hallo Ada');
+        $this->request('GET', '/')->withCookie('lang', 'de')->send()->assertSee('In den Warenkorb');
     }
 
     public function testValidationErrorsInGerman(): void
     {
-        $this->json('POST', '/signup?lang=de', ['email' => 'nope'])
+        $this->json('POST', '/v1/tokens?lang=de', ['email' => 'ben', 'password' => ''])
             ->assertStatus(422)
             ->assertJsonPath('errors.email', 'Dieser Wert ist keine gültige E-Mail-Adresse.');
     }
+}
+```
+
+A live component has no request of its own in a test; set the locale on the `Translator` before mounting it. From `tests/Components/CheckoutTest.php`:
+
+```php
+public function testTheFormIsValidatedInTheCustomersLanguage(): void
+{
+    $this->app()->get(Translator::class)->setLocale('de');
+    $tab = $this->customerTab();
+    $tab->mount('app-add-to-cart', ['product' => '4'])->click('add');
+    $tab->mount('app-checkout')
+        ->submit('form', ['name' => '', 'email' => 'nope', 'pickupDate' => date('Y-m-d')])
+        ->assertSee('Dieser Wert darf nicht leer sein.')
+        ->assertSee('Dieser Wert ist keine gültige E-Mail-Adresse.')
+        ->assertSee('Bitte wähle einen der Abholtage.');
 }
 ```
 
@@ -80,11 +70,11 @@ final class PluralTest extends TestCase
     public function testGermanPlural(): void
     {
         $options = new I18nOptions();
-        $options->directory = __DIR__ . '/lang';
+        $options->directory = __DIR__ . '/lang';   // tests/lang/de.json: {"{count} pretzel|{count} pretzels": "{count} Brezel|{count} Brezeln"}
         $translator = new Translator($options);
         $translator->setLocale('de');
 
-        $this->assertSame('3 Dateien', $translator->t('{count} file|{count} files', ['count' => 3]));
+        $this->assertSame('3 Brezeln', $translator->t('{count} pretzel|{count} pretzels', ['count' => 3]));
     }
 }
 ```
@@ -94,13 +84,13 @@ final class PluralTest extends TestCase
 The simplest guard runs the tasks themselves; `i18n:check` exits with 1 when a text is untranslated or a translation lost a placeholder:
 
 ```bash
-php index.php i18n:extract && php index.php i18n:check && php index.php i18n:lint
+tenma index.php i18n:extract && tenma index.php i18n:check && tenma index.php i18n:lint
 ```
 
 Run `extract` on a clean checkout; if it changes a catalog, someone forgot to run it. A CI step can fail on that:
 
 ```bash
-php index.php i18n:extract && git diff --exit-code lang/
+tenma index.php i18n:extract && git diff --exit-code lang/
 ```
 
 The tasks can also run inside a test. They are methods on the router; a failing task throws a `RuntimeException` with the problems in its message:
@@ -114,6 +104,6 @@ public function testEveryCatalogIsComplete(): void
 }
 ```
 
-For that test, configure `directory` and `scanPaths` with the app's real catalogs and code, not fixtures.
+For that test, configure `directory` and `scanPaths` with the app's real catalogs and code, not fixtures; an `AppTestCase` like the Bakery's already has them from `app.php`.
 
 See also: [Waypoint's testing kit](https://github.com/systonia/Waypoint/blob/main/README.md#testing).

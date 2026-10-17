@@ -4,7 +4,7 @@ description: Every option of I18nOptions, with its default and what reads it.
 order: 50
 ---
 
-The plugin reads only its own [`I18nOptions`](../reference/Waypoint/I18n/I18nOptions.md). Set them with `$app->configure()`, before `attach()`:
+The plugin reads only its own [`I18nOptions`](../reference/Waypoint/I18n/I18nOptions.md). Set them with `$app->configure()`, before `attach()`. The Bakery sets `directory`, `default`, `supported` and `scanPaths` in its `app.php`; here is every option with its default:
 
 ```php
 use Waypoint\Environment;
@@ -12,17 +12,17 @@ use Waypoint\I18n\{I18nOptions, I18nPlugin};
 
 $app->plugin(new I18nPlugin());
 
-$app->configure(function (I18nOptions $opts) {
-    $opts->directory = __DIR__ . '/lang';
-    $opts->default = 'en';
-    $opts->fallback = null;
-    $opts->supported = ['en', 'de', 'fr'];
-    $opts->queryParam = 'lang';
-    $opts->cookieName = 'lang';
-    $opts->cookieTtl = 31536000;
-    $opts->resolver = null;
-    $opts->includeDefaults = true;
-    $opts->scanPaths = [__DIR__ . '/views', __DIR__ . '/src'];
+$app->configure(function (I18nOptions $i18n) {
+    $i18n->directory = __DIR__ . '/lang';
+    $i18n->default = 'en';
+    $i18n->fallback = null;
+    $i18n->supported = ['en', 'de'];
+    $i18n->queryParam = 'lang';
+    $i18n->cookieName = 'lang';
+    $i18n->cookieTtl = 31536000;
+    $i18n->resolver = null;
+    $i18n->includeDefaults = true;
+    $i18n->scanPaths = [__DIR__ . '/views', __DIR__ . '/src'];
 });
 ```
 
@@ -41,12 +41,14 @@ $app->configure(function (I18nOptions $opts) {
 
 ## Values from the environment
 
-Options are plain PHP, so values that differ between machines come from `Waypoint\Environment` (environment variables, `.env`, `config.json`) like every other Waypoint setting. A deployment can, for example, offer a language only once it is translated:
+Options are plain PHP, so values that differ between machines come from `Waypoint\Environment` (environment variables, `.env`, `config.json`) like every other Waypoint setting. The Bakery reads its time zone that way (`BAKERY_TIMEZONE`). A deployment can, for example, offer a language only once it is translated:
 
 ```php
-$app->configure(function (I18nOptions $opts, Environment $env) {
-    $opts->directory = __DIR__ . '/lang';
-    $opts->supported = explode(',', (string) $env->get('LOCALES', 'en,de'));
+$env = $app->get(Environment::class);
+
+$app->configure(function (I18nOptions $i18n) use ($env) {
+    $i18n->directory = __DIR__ . '/lang';
+    $i18n->supported = explode(',', $env->string('BAKERY_LOCALES', 'en,de'));
 });
 ```
 

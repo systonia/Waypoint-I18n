@@ -23,12 +23,14 @@ A locale is accepted when it looks like a language tag (`de`, `pt-BR`, `zh-Hant`
 
 Anything else is ignored and the next source is asked, so `?lang=xx` or a cookie with a removed language simply falls through.
 
+The Bakery's shop:
+
 ```bash
 $ curl -i 'localhost:8080/?lang=de'
 content-language: de
 set-cookie: lang=de; Path=/; Max-Age=31536000; SameSite=Lax
 ...
-<h1>Hallo Ada</h1>
+    <title>Laden · Sonnenkorn</title>
 ```
 
 The cookie is not `HttpOnly`, so a language switcher in JavaScript can read and set it too.
@@ -45,27 +47,30 @@ The header is sorted by `q` (a missing `q` counts as 1, equal values keep their 
 
 ## A language switcher
 
-Links with the query parameter are enough: the first click stores the cookie, later pages need no parameter.
+Links with the query parameter are enough: the first click stores the cookie, later pages need no parameter. The header of the Bakery's `views/_Layout.php`:
 
 ```html
-<nav>
-    <a href="?lang=en" aria-current="{{ $this->locale() === 'en' ? 'true' : 'false' }}">English</a>
-    <a href="?lang=de" aria-current="{{ $this->locale() === 'de' ? 'true' : 'false' }}">Deutsch</a>
+<nav class="ml-auto flex items-center gap-3 text-sm">
+    <a href="?lang=en" class="{{ $this->locale() === 'en' ? 'font-semibold' : 'text-stone-500' }}">EN</a>
+    <a href="?lang=de" class="{{ $this->locale() === 'de' ? 'font-semibold' : 'text-stone-500' }}">DE</a>
+    <app-cart-badge></app-cart-badge>
 </nav>
 ```
 
+The live components on the page (here the cart badge) keep the locale of the page they were rendered in, also over their WebSocket.
+
 ## A custom resolver
 
-The resolver is asked first. It returns a locale, or `null` to let the usual order decide. What it returns must still be accepted, so a wrong value cannot select a language the app does not have. Here the subdomain picks the language (`de.example.com`), and `www.example.com` falls through to the cookie and the browser:
+The resolver is asked first. It returns a locale, or `null` to let the usual order decide. What it returns must still be accepted, so a wrong value cannot select a language the app does not have. Here the subdomain picks the language (`de.sonnenkorn.test`), and `www.sonnenkorn.test` falls through to the cookie and the browser:
 
 ```php
 use Waypoint\Http\Request;
 use Waypoint\I18n\I18nOptions;
 
-$app->configure(function (I18nOptions $opts) {
-    $opts->directory = __DIR__ . '/lang';
-    $opts->supported = ['en', 'de', 'fr'];
-    $opts->resolver = fn (Request $req): ?string => explode('.', $req->headers['Host'] ?? '')[0];
+$app->configure(function (I18nOptions $i18n) {
+    $i18n->directory = __DIR__ . '/lang';
+    $i18n->supported = ['en', 'de'];
+    $i18n->resolver = fn (Request $req): ?string => explode('.', $req->headers['Host'] ?? '')[0];
 });
 ```
 
@@ -74,9 +79,9 @@ Request headers are normalized to `Some-Header` casing, so `Host` and `Accept-La
 ## Turning sources off
 
 ```php
-$app->configure(function (I18nOptions $opts) {
-    $opts->queryParam = '';   // ?lang= is ignored
-    $opts->cookieName = '';   // no cookie is read or written
+$app->configure(function (I18nOptions $i18n) {
+    $i18n->queryParam = '';   // ?lang= is ignored
+    $i18n->cookieName = '';   // no cookie is read or written
 });
 ```
 
@@ -84,10 +89,10 @@ With both off, only the resolver and `Accept-Language` choose. `cookieTtl` sets 
 
 ## The locale outside a request
 
-CLI tasks, timers and code at startup run outside the middleware, so `locale()` is `$default` there. Pass the locale to `t()` instead:
+CLI tasks, timers and code at startup run outside the middleware, so `locale()` is `$default` there. Pass the locale to `t()` instead. The Bakery stores the customer's language with each order (`Order::$locale`, from `$this->i18n->locale()` at checkout), so a timer in `index.php` that tells customers their order is ready can write in their language:
 
 ```php
-$body = $translator->t('Your export is ready.', [], $user->locale);
+$subject = $translator->t('Your order {code} is ready for pickup.', ['code' => $order->code], $order->locale);
 ```
 
 The current locale belongs to the request. The `Translator` is one shared service, but it keeps the locale in a `Waypoint\Support\FiberLocal`, so under Tenma, where one worker runs requests concurrently, a request that waits (a database query, `Tenma::sleep()`, an outgoing HTTP call) still translates in its own locale when it continues, whatever other requests chose in the meantime.
