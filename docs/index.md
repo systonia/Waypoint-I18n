@@ -70,10 +70,10 @@ $app->serve();
 
 `views/Home.php`:
 
-```php
-<h1><?= $this->t('Hello {name}', ['name' => $model['name']]) ?></h1>
-<p><?= $this->t('{count} file|{count} files', ['count' => $model['files']]) ?></p>
-<p><?= $this->t('Current language: {locale}', ['locale' => $this->locale()]) ?></p>
+```html
+<h1>{{ $this->t('Hello {name}', ['name' => $model['name']]) }}</h1>
+<p>{{ $this->t('{count} file|{count} files', ['count' => $model['files']]) }}</p>
+<p>{{ $this->t('Current language: {locale}', ['locale' => $this->locale()]) }}</p>
 ```
 
 Create the German catalog from the code, then fill in the empty strings:

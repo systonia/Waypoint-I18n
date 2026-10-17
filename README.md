@@ -2,9 +2,9 @@
 
 Translations for [Waypoint](https://github.com/Systonia/Waypoint): the text in your code is the key.
 
-```php
-<h2><?= $this->t('Welcome to gdn.ani') ?></h2>
-<p><?= $this->t('{count} file|{count} files', ['count' => $n]) ?></p>
+```html
+<h2>{{ $this->t('Welcome to gdn.ani') }}</h2>
+<p>{{ $this->t('{count} file|{count} files', ['count' => $n]) }}</p>
 ```
 
 The source language needs no catalog. Every other language is one flat JSON file that the CLI
@@ -42,8 +42,8 @@ $app->configure(function (I18nOptions $opts) {
 - Templates: `$this->t('Save')`, `$this->t('Hello {name}', ['name' => $user->name])`, `$this->locale()`.
 - Services and controllers: `#[Inject] Waypoint\I18n\Translator $translator` and `$translator->t(...)`.
 - `{name}` is replaced from the parameters; `one|other` picks the first form when `count` is 1.
-- `t()` never escapes, so it also works for `<title>`, attributes or mail text; in a view `<?= ?>`
-  escapes the result: `<?= $this->t('Welcome back, {name}.', ['name' => $name]) ?>`.
+- `t()` never escapes, so it also works for `<title>`, attributes or mail text; in a view `{{ }}`
+  escapes the result: `{{ $this->t('Welcome back, {name}.', ['name' => $name]) }}`.
 - Use string literals: `t($variable)` works at runtime but the tasks cannot see it (`i18n:lint` reports it).
 
 ## Catalogs

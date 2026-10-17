@@ -47,10 +47,10 @@ The header is sorted by `q` (a missing `q` counts as 1, equal values keep their 
 
 Links with the query parameter are enough: the first click stores the cookie, later pages need no parameter.
 
-```php
+```html
 <nav>
-    <a href="?lang=en" aria-current="<?= $this->locale() === 'en' ? 'true' : 'false' ?>">English</a>
-    <a href="?lang=de" aria-current="<?= $this->locale() === 'de' ? 'true' : 'false' ?>">Deutsch</a>
+    <a href="?lang=en" aria-current="{{ $this->locale() === 'en' ? 'true' : 'false' }}">English</a>
+    <a href="?lang=de" aria-current="{{ $this->locale() === 'de' ? 'true' : 'false' }}">Deutsch</a>
 </nav>
 ```
 

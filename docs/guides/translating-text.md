@@ -10,11 +10,11 @@ A translatable text is a call to `t()` with the text in the source language. The
 
 The plugin adds two [view helpers](https://github.com/systonia/Waypoint/blob/main/README.md#plugins) to every template and layout:
 
-```php
-<title><?= $this->t('Your files') ?></title>
-<p><?= $this->t('Save') ?></p>
-<p><?= $this->t('Hello {name}', ['name' => $model['name']]) ?></p>
-<html lang="<?= $this->locale() ?>">
+```html
+<title>{{ $this->t('Your files') }}</title>
+<p>{{ $this->t('Save') }}</p>
+<p>{{ $this->t('Hello {name}', ['name' => $model['name']]) }}</p>
+<html lang="{{ $this->locale() }}">
 ```
 
 - `$this->t(string $text, array $params = [], ?string $locale = null)` returns the translation in the current locale.
@@ -73,16 +73,16 @@ The translation has the same two forms: `"{count} Datei|{count} Dateien"`. The f
 
 ## Escaping
 
-`t()` never escapes. That keeps it usable for `<title>`, attributes, JSON and mail text. In a view `<?= ?>` escapes the result, parameters from a user included:
+`t()` never escapes. That keeps it usable for `<title>`, attributes, JSON and mail text. In a view `{{ }}` escapes the result, parameters from a user included:
 
-```php
-<p><?= $this->t('Welcome back, {name}.', ['name' => $user->name]) ?></p>
+```html
+<p>{{ $this->t('Welcome back, {name}.', ['name' => $user->name]) }}</p>
 ```
 
 A translation may contain markup on purpose (`"Read the <a href=\"/terms\">terms</a>"`); then escape the parameters instead of the result and print it as a `Waypoint\Html`:
 
-```php
-<p><?= new Waypoint\Html($this->t('Read the <a href="/terms">terms</a>, {name}.', ['name' => htmlspecialchars($user->name)])) ?></p>
+```html
+<p>{{ new Waypoint\Html($this->t('Read the <a href="/terms">terms</a>, {name}.', ['name' => htmlspecialchars($user->name)])) }}</p>
 ```
 
 ## Keep texts extractable
