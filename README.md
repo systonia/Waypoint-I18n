@@ -42,8 +42,8 @@ $app->configure(function (I18nOptions $opts) {
 - Templates: `$this->t('Save')`, `$this->t('Hello {name}', ['name' => $user->name])`, `$this->locale()`.
 - Services and controllers: `#[Inject] Waypoint\I18n\Translator $translator` and `$translator->t(...)`.
 - `{name}` is replaced from the parameters; `one|other` picks the first form when `count` is 1.
-- `t()` never escapes, so it also works for `<title>`, attributes or mail text; escape the result where it
-  lands in HTML: `<?= $this->t('Welcome back, {name}.', ['name' => $name]) |> htmlspecialchars(...) ?>`.
+- `t()` never escapes, so it also works for `<title>`, attributes or mail text; in a view `<?= ?>`
+  escapes the result: `<?= $this->t('Welcome back, {name}.', ['name' => $name]) ?>`.
 - Use string literals: `t($variable)` works at runtime but the tasks cannot see it (`i18n:lint` reports it).
 
 ## Catalogs

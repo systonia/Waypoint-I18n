@@ -71,7 +71,7 @@ $app->serve();
 `views/Home.php`:
 
 ```php
-<h1><?= $this->t('Hello {name}', ['name' => $model['name']]) |> htmlspecialchars(...) ?></h1>
+<h1><?= $this->t('Hello {name}', ['name' => $model['name']]) ?></h1>
 <p><?= $this->t('{count} file|{count} files', ['count' => $model['files']]) ?></p>
 <p><?= $this->t('Current language: {locale}', ['locale' => $this->locale()]) ?></p>
 ```

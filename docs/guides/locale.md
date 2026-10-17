@@ -49,8 +49,8 @@ Links with the query parameter are enough: the first click stores the cookie, la
 
 ```php
 <nav>
-    <a href="?lang=en" <?= $this->locale() === 'en' ? 'aria-current="true"' : '' ?>>English</a>
-    <a href="?lang=de" <?= $this->locale() === 'de' ? 'aria-current="true"' : '' ?>>Deutsch</a>
+    <a href="?lang=en" aria-current="<?= $this->locale() === 'en' ? 'true' : 'false' ?>">English</a>
+    <a href="?lang=de" aria-current="<?= $this->locale() === 'de' ? 'true' : 'false' ?>">Deutsch</a>
 </nav>
 ```
 
